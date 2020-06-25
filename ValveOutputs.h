@@ -18,7 +18,7 @@ void setupGPIOBits()
   Serial.println("Turning off USB valves and Sensors");
 #endif
   // run befor semaphore setup
-   xSemaphoreTake( xSemaphoreUseI2C, portMAX_DELAY);
+  xSemaphoreTake( xSemaphoreUseI2C, portMAX_DELAY);
   sx1502.writeGPIO(0x00);
 
   sx1502.setPulldownGPIOChannel(SX1502_REG_IO0, SX1502_ON);
@@ -109,8 +109,57 @@ void writeGPIOBit(byte pin, byte value)
 
 
 
-
   sx1502.writeGPIO(writeValue);
+
+  
+
+  // do the bad 0xFF check
+  bool correct;
+  correct = true;
+  if (currentValue == 0xFF)
+  {
+    // check to see if it is actually supposed to be 0xFF
+
+    int i;
+
+    for (i = 0; i < 4; i++)
+    {
+      if ((moistureSensorEnable[i] == 0) || (valveState[i] == 0))
+      {
+
+
+        correct = false;
+        Serial.println("writeGPIO - 0xFF found to be wrong");
+        break;
+      }
+
+    }
+
+    if (correct == false)
+    {
+      sendMQTT(MQTTDEBUG, "SX1502 current value = 0xFF");
+
+      delay(5000);
+      Serial.println("0xFF detected - LOCKING CPU");
+
+      while (digitalRead(15) == 1)
+      {
+
+        delay(5000);
+        Serial.println("Waiting for Unlock GPIO15");
+      }
+      Serial.println("UNLOCKING CPU");
+      int i;
+
+      i = 343 / 0;
+      Serial.print (i);
+    }
+    else
+     Serial.println("writeGPIO - 0xFF found to be correct");
+
+
+
+  }
 
   xSemaphoreGive( xSemaphoreUseI2C);
 
@@ -192,7 +241,7 @@ void initializeValvesAndSensors()
 
 int writeValve(int number, byte OnOff)
 {
-  Serial.print("xSemaphoreUseI2C=");
+  Serial.print("WVxSemaphoreUseI2C=");
   Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
 
 
@@ -203,6 +252,9 @@ int writeValve(int number, byte OnOff)
     case 3:
     case 4:
       Serial.println("Before writeGPIOBit");
+      Serial.print("number=");
+      Serial.println(number);
+      // read the GPIO Port to check corruption
       writeGPIOBit(number + 3, OnOff);
 
       break;

@@ -53,7 +53,7 @@ int sendMQTT(int messageType, String argument)
         AddString += "\", \"messagetype\": \"";
         AddString += messageType;
 
-        SendString = "{" + AddString +  "}"; //Send the request
+        SendString = "{" + AddString +  "\"}"; //Send the request
 
         break;
       }
@@ -67,12 +67,44 @@ int sendMQTT(int messageType, String argument)
         AddString += "\", \"value\": \"";
         AddString += argument;
 
-        SendString = "{" + AddString +  "}"; //Send the request
-
+        SendString = "{" + AddString +  "\"}"; //Send the request
+        break;
 
 
       }
+    case MQTTSENSORS:
+      {
 
+        AddString = "\"id\": \"";
+        AddString += myID;
+        AddString += "\", \"messagetype\": \"";
+        AddString += messageType;
+        AddString += "\", \"enableSensors\": \"";
+        
+        int i;
+        for (i = 0; i < 4; i++)
+        {
+   
+          AddString += String(moistureSensorEnable[i]) + ",";
+          
+        }
+        AddString += "\", \"sensorValues\": \"";
+          for (i = 0; i < 4; i++)
+        {
+   
+          AddString += String(moistureSensors[i]) + ",";
+          
+        }
+        AddString += "\", \"sensorType\": \"";
+        String mySensorType = "C1,C1,C1,C1";
+        AddString += mySensorType + "\"";
+ 
+
+        SendString = "{" + AddString +  "}"; //Send the request
+
+
+        break;
+      }
 
     default:
       break;

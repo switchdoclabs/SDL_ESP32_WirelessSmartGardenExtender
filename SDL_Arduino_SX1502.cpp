@@ -20,6 +20,7 @@
 
 #include "SDL_Arduino_SX1502.h"
 
+
 /**************************************************************************/
 /*!
   @brief  Sends a single command byte over I2C
@@ -140,32 +141,7 @@ uint8_t SDL_Arduino_SX1502::writeGPIO(uint8_t value) {
 
   Serial.print("writeGPIO: Value = 0x");
   Serial.println(value, HEX);
-
-  if (value == 0xFF)
-  {
-
-
-
-    sendMQTT(MQTTDEBUG, "SX1502 value = 0xFF");
-
-    delay(5000);
-    Serial.println("0xFF detected - LOCKING CPU");
-
-    while (digitalRead(15) == 1)
-    {
-
-      delay(5000);
-      Serial.println("Waiting for Unlock GPIO15");
-    }
-    Serial.println("UNLOCKING CPU");
-    int i;
-
-    i = 343 / 0;
-    Serial.print (i);
-
-
-
-  }
+ 
   //Serial.print("GPIO Write Raw=");
   //Serial.println(value,HEX);
 

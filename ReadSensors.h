@@ -80,8 +80,8 @@ void readSensors()
     }
 
   }
-  xSemaphoreGive( xSemaphoreUseI2C);
 
+  xSemaphoreGive( xSemaphoreUseI2C);
   for (i = 0; i < 4; i++)
   {
     writeGPIOBit(i, false);

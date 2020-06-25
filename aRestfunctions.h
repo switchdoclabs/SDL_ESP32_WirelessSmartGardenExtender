@@ -347,6 +347,34 @@ int setStationName(String command)
 
 }
 
+
+int setClockOffset(String command)
+{
+  RESTreturnString = "";
+  Serial.print("Command =");
+  Serial.println(command);
+
+
+  String Password;
+  String newOffset;
+
+  Password = getValue(command, ',', 0);
+  newOffset = getValue(command, ',', 1);
+
+  if (Password == adminPassword)
+  {
+    ClockTimeOffsetToUTC = newOffset.toInt();
+    timeClient.setTimeOffset(ClockTimeOffsetToUTC);
+    writePreferences();
+    return 1;
+  }
+  else
+    return 0;
+
+  return 1;
+
+}
+
 int resetSGS2Ext(String command) {
   RESTreturnString = "";
   Serial.println("resetSGS2Ext - settings invalidated");

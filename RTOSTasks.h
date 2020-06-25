@@ -30,9 +30,10 @@ void taskReadSensors( void * parameter)
       xSemaphoreTake( xSemaphoreSensorsBeingRead, 10000);
       readSensors();
       xSemaphoreGive( xSemaphoreSensorsBeingRead);
+      sendMQTT(MQTTSENSORS, "");
     }
-    vTaskDelay(600000 / portTICK_PERIOD_MS);
-
+    //vTaskDelay(600000 / portTICK_PERIOD_MS);
+    vTaskDelay(300000 / portTICK_PERIOD_MS);
   }
 
 }

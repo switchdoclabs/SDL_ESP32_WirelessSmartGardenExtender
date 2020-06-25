@@ -8,13 +8,14 @@
 
 
 
-#define SGSEXTENDERESP32VERSION "009"
+#define SGSEXTENDERESP32VERSION "011"
 
 #define CONTROLLERBOARD "V1"
 
 #define SGSEXTENDERESP32NRESTPROTOCOL "SGSEXT001"
 
-#define DEFAULTCLOCKTIMEOFFSETTOUTC -21600
+//#define DEFAULTCLOCKTIMEOFFSETTOUTC -21600
+#define DEFAULTCLOCKTIMEOFFSETTOUTC 0
 
 #define WEATHERPLUSMQTTPROTOCOL "SGSEXT001"
 
@@ -33,9 +34,6 @@
 
 int sendMQTT(int messageType, String argument);
 
-#include "SDL_Arduino_SX1502.h"
-
-SDL_Arduino_SX1502 sx1502(SX1502ADDRESS);
 
 
 
@@ -151,6 +149,12 @@ int valveState[8];
 float valveTime[8];
 float moistureSensors[4];
 int moistureSensorEnable[4];
+
+#include "SDL_Arduino_SX1502.h"
+
+SDL_Arduino_SX1502 sx1502(SX1502ADDRESS);
+
+
 
 // For REST return Values
 
@@ -346,7 +350,6 @@ struct MyAnimationState
 
 
 
-#define DEFAULTCLOCKTIMEOFFSETTOUTC -21600
 
 #undef DEBUGBLYNK
 
@@ -436,7 +439,7 @@ void initialState()
   for (i = 0; i < 4; i++)
   {
     moistureSensors[i] = 0.0;
-    moistureSensorEnable[i] = 0;
+    moistureSensorEnable[i] = 1;   // enable sensor.  Can be turned off on controller
   }
 
 }
@@ -683,6 +686,84 @@ void setup()
   // End Setup WiFi Interface
   //---------------------
 
+
+  // Now do NTP (set's time to 00:00:00 if not present)  January 1, 1970
+
+  Serial.println("--------");
+  Serial.println("NTP Time Fetch");
+  Serial.println("--------");
+
+  // changed later with setTimeOffset() ). Additionaly you can specify the
+  // update interval (in milliseconds, can be changed using setUpdateInterval() ).
+  timeClient.begin();
+  //timeClient.forceUpdate();
+
+  timeClient.setTimeOffset(ClockTimeOffsetToUTC);
+  if (WiFiPresent == true)
+  {
+    timeClient.setUpdateInterval(3600000);
+    //
+    timeClient.update();
+  }
+  time_t t;
+  if (WiFiPresent == true)
+  {
+    /* Serial.print("Getting epochTime = ");
+      t = timeClient.getEpochTime();
+      Serial.println(t);
+      if (t < 2000)
+      {
+       // Try again to update
+       timeClient.forceUpdate();
+
+       Serial.print("Getting epochTime Try 2= ");
+       t = timeClient.getEpochTime();
+       Serial.println(t);
+
+       // and again
+       if (t < 2000)
+       {
+         timeClient.forceUpdate();
+         Serial.print("Getting epochTime Try 3= ");
+         t = timeClient.getEpochTime();
+         Serial.println(t);
+
+       }
+
+      }
+    */
+    int timeout;
+    timeout = 0;
+    while (!timeClient.update()) {
+      timeClient.forceUpdate();
+      timeout++;
+      if (timeout > 1000) {
+        Serial.println("NTP Timeout - time set to default");
+        break;
+      }
+
+
+    }
+
+    Serial.print("NTP timeout count = ");
+    Serial.println(timeout);
+    Serial.print("Getting epochTime = ");
+    t = timeClient.getEpochTime();
+    Serial.println(t);
+  }
+  else
+  {
+    Serial.println("No WiFi Present - NTP not set");
+    t = 1;
+  }
+
+
+    setTime(t);
+
+
+  digitalClockDisplay();
+
+  
   // start up REST
 
 #define WL_MAC_ADDR_LENGTH 6
@@ -707,6 +788,8 @@ void setup()
   rest.function("readMoistureSensors", readMoistureSensors);
   rest.function("blinkPixelCommand", blinkPixelCommand);
   rest.function("setStationName", setStationName);
+  rest.function("setClockOffset", setClockOffset);
+
   rest.function("updateSGS", updateSGS);
 
   // Give name & ID to the device (ID should be 6 characters long)
