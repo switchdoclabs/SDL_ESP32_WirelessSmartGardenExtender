@@ -90,6 +90,19 @@ void writeGPIOBit(byte pin, byte value)
 
 
   currentValue = sx1502.readGPIO();
+  if (currentValue == 0xFF)  // read again
+  {
+    delay(100);
+    currentValue = sx1502.readGPIO();
+    // check to see if it is actually supposed to be 0xFF
+
+    String message;
+    message = "First Read 0xFF, Second Read Current Value:" + String(currentValue);
+    
+    sendMQTT(MQTTDEBUG, message);
+
+
+  }
 
 
 
@@ -111,7 +124,7 @@ void writeGPIOBit(byte pin, byte value)
 
   sx1502.writeGPIO(writeValue);
 
-  
+
 
   // do the bad 0xFF check
   bool correct;
@@ -138,7 +151,22 @@ void writeGPIOBit(byte pin, byte value)
     if (correct == false)
     {
       sendMQTT(MQTTDEBUG, "SX1502 current value = 0xFF");
+      String temp;
+      temp = "";
+      temp += " SE";
+      int i;
+      for (i = 0; i < 4; i++)
+      {
+        temp += String(moistureSensorEnable[i]);
 
+      }
+      temp += " VS";
+      for (i = 0; i < 4; i++)
+      {
+        temp += String(valveState[i]);
+
+      }
+      sendMQTT(MQTTDEBUG, temp);
       delay(5000);
       Serial.println("0xFF detected - LOCKING CPU");
 
@@ -149,13 +177,13 @@ void writeGPIOBit(byte pin, byte value)
         Serial.println("Waiting for Unlock GPIO15");
       }
       Serial.println("UNLOCKING CPU");
-      int i;
+
 
       i = 343 / 0;
       Serial.print (i);
     }
     else
-     Serial.println("writeGPIO - 0xFF found to be correct");
+      Serial.println("writeGPIO - 0xFF found to be correct");
 
 
 

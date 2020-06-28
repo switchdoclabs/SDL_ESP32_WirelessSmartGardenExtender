@@ -117,7 +117,7 @@
 
 // Debug mode
 #ifndef DEBUG_MODE
-#define DEBUG_MODE 4
+#define DEBUG_MODE 0
 #endif
 
 
@@ -436,7 +436,7 @@ class aREST {
 #if defined(ESP8266)|| defined (ESP32)
         Serial.print("Memory loss:");
         Serial.println(freeMemory - ESP.getFreeHeap(), DEC);
-        freeMemory = ESP.getFreeHeap();
+       freeMemory = ESP.getFreeHeap();
 #endif
         Serial.print(F("Added to buffer as progmem: "));
         Serial.println(toAdd);

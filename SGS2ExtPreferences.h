@@ -36,8 +36,6 @@ void writePreferences()
 
   preferences.putString("stationName", stationName);
 
-  Serial.print("ClockTimeOffsetToUTC=");
-  Serial.println(ClockTimeOffsetToUTC);
   preferences.putInt("COffsetToUTC", ClockTimeOffsetToUTC);
 
 
@@ -49,6 +47,7 @@ void writePreferences()
   preferences.putInt("SolarMAXLiPo", SolarMAXLiPo);
   preferences.putString("MQTT_IP", MQTT_IP);
   preferences.putInt("MQTT_PORT", MQTT_PORT);
+  preferences.putInt("SENSORCYCLE", sensorCycle);
 
   preferences.end();
 
@@ -84,6 +83,8 @@ void writePreferences()
   Serial.println(MQTT_IP);
   Serial.print("MQTT_PORT=");
   Serial.println(MQTT_PORT);
+  Serial.print("SensorCycle=");
+  Serial.println(sensorCycle);
   Serial.println("--------------------------");
 
 #endif
@@ -116,9 +117,7 @@ void readPreferences()
   SolarMAXLiPo = preferences.getInt("SolarMAXLiPo", 0);
   MQTT_IP = preferences.getString("MQTT_IP", "");
   MQTT_PORT = preferences.getInt("MQTT_PORT", 1833);
-
-
-
+  sensorCycle = preferences.getInt("SENSORCYCLE", 600);
 
 
   preferences.end();
@@ -153,9 +152,10 @@ void readPreferences()
   Serial.println(MQTT_IP);
   Serial.print("MQTT_PORT=");
   Serial.println(MQTT_PORT);
+  Serial.print("SensorCycle=");
+  Serial.println(sensorCycle);
   Serial.println("--------------------------");
 
 
-  Serial.println("--------------------------");
 #endif
 }

@@ -279,7 +279,7 @@ void updateDisplay(int displayMode)
 
         // Displays Moisture Levels
         buffer[0] = '\0';
-        sprintf(buffer, "MSensor #%i", unit);
+        sprintf(buffer, "MSensor #%i", unit+1);
         setDisplayLine(0, buffer);
         buffer[0] = '\0';
         sprintf(buffer, "%3.1f%%", moistureSensors[unit]);

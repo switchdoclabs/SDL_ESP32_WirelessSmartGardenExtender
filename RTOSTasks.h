@@ -33,7 +33,7 @@ void taskReadSensors( void * parameter)
       sendMQTT(MQTTSENSORS, "");
     }
     //vTaskDelay(600000 / portTICK_PERIOD_MS);
-    vTaskDelay(300000 / portTICK_PERIOD_MS);
+    vTaskDelay(sensorCycle*1000 / portTICK_PERIOD_MS);
   }
 
 }

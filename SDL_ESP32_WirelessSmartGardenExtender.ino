@@ -8,7 +8,8 @@
 
 
 
-#define SGSEXTENDERESP32VERSION "011"
+#define SGSEXTENDERESP32VERSION "018"
+
 
 #define CONTROLLERBOARD "V1"
 
@@ -130,6 +131,7 @@ String adminPassword;
 int EnglishOrMetric;   // 0 = English units, 1 = Metric
 int SolarMAXLA = 0;
 int SolarMAXLiPo = 0;
+int sensorCycle = 600;
 String MQTT_IP;
 int MQTT_PORT;
 
@@ -252,14 +254,90 @@ unsigned long MQTTlastMsg = 0;
 #define MQTTMSG_BUFFER_SIZE  (400)
 char MQTTmsg[MQTTMSG_BUFFER_SIZE];
 
+
+
 void MQTTcallback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Arrived Topic:");
+  Serial.println(topic);
   Serial.print("Message arrived [");
-  Serial.print(topic);
+
   Serial.print("] ");
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
+  char buffer[400];
+  int i;
+  for (i = 0; i < length; i++)
+  {
+    buffer[i] = payload[i];
+  }
+  buffer[i] = 0;
+
+  StaticJsonDocument<400> myJSON;
+  // serialize to JSON then interpret
+  DeserializationError error = deserializeJson(myJSON, buffer);
+  // Test if parsing succeeds.
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.c_str());
+    return;
+  }
+
+
+  int messagetype = myJSON["messagetype"];
+  Serial.print("messagetype=");
+  Serial.println(messagetype);
+
+
+  switch (messagetype)
+  {
+
+    case MQTTPUBVALVESET:
+      {
+
+        xSemaphoreTake( xSemaphoreEvaluatingValves, 1000);
+        int i;
+
+        int myValve = myJSON["valve"];
+        float myTime = myJSON["timeon"];
+        int myState = myJSON["state"];
+        if ((myValve < 1) || (myValve > 8))
+        {
+          return;
+        }
+
+        if (((myState == 0 ) || (myState == 1)) != true)
+        {
+          return;
+        }
+
+        valveState[myValve - 1] = myState;
+        valveTime[myValve - 1] = myTime;
+
+
+        turnOnAppropriateValves();
+
+#ifdef SGS2EXTDEBUG
+
+        Serial.println("____________________________________________");
+        printValveState();
+        Serial.println("____________________________________________");
+#endif
+
+        xSemaphoreGive( xSemaphoreEvaluatingValves);
+        break;
+      }
+    default:
+    
+      Serial.print("unsupported incoming MQTT Message:");
+
+      Serial.print(buffer);
+
+      Serial.println();
+      break;
+  }
+  return;
 
 }
 
@@ -277,12 +355,21 @@ void MQTTreconnect() {
       String clientId = "SGSWireless-";
       clientId += String(random(0xffff), HEX);
       // Attempt to connect
+      Serial.print("client name=");
+      Serial.println(clientId);
       if (MQTTclient.connect(clientId.c_str())) {
         Serial.println("connected");
         // Once connected, publish an announcement...
-        String Topic = "SGS/" + myID;
+        //String Topic = "SGS/" + myID;
         //MQTTclient.publish(Topic.c_str(), "hello world");
-        i = 5;
+        String topic;
+        topic = "SGS/" + myID + "/Valves";
+        Serial.print("sub to topic=");
+        Serial.println(topic);
+
+        MQTTclient.subscribe(topic.c_str());
+
+        break;
 
       } else {
         Serial.print("failed, rc=");
@@ -293,6 +380,16 @@ void MQTTreconnect() {
 
       }
       i++;
+    }
+    // check for 5 failures and then reboot
+    if (i == 5)
+    {
+      // Force Exception and reboot
+
+      int j;
+
+      j = 343 / 0;
+      Serial.print (i);
     }
   }
 }
@@ -563,6 +660,14 @@ void setup()
   WiFi.persistent(false);
   WiFi.begin();
 
+#define WL_MAC_ADDR_LENGTH 6
+  // Append the last two bytes of the MAC (HEX'd) to string to make unique
+  uint8_t mac[WL_MAC_ADDR_LENGTH];
+  WiFi.softAPmacAddress(mac);
+  String macID = String(mac[WL_MAC_ADDR_LENGTH - 2], HEX) +
+                 String(mac[WL_MAC_ADDR_LENGTH - 1], HEX);
+  macID.toUpperCase();
+  myID = macID;
 
   // check for SSID
 
@@ -671,6 +776,8 @@ void setup()
     MQTTclient.setServer(MQTT_IP.c_str(), MQTT_PORT);
     MQTTclient.setCallback(MQTTcallback);
     //blinkIPAddress();
+    MQTTreconnect();
+
 
     updateDisplay(DISPLAY_IPDISPLAY);
   }
@@ -758,22 +865,15 @@ void setup()
   }
 
 
-    setTime(t);
+  setTime(t);
 
 
   digitalClockDisplay();
 
-  
+
   // start up REST
 
-#define WL_MAC_ADDR_LENGTH 6
-  // Append the last two bytes of the MAC (HEX'd) to string to make unique
-  uint8_t mac[WL_MAC_ADDR_LENGTH];
-  WiFi.softAPmacAddress(mac);
-  String macID = String(mac[WL_MAC_ADDR_LENGTH - 2], HEX) +
-                 String(mac[WL_MAC_ADDR_LENGTH - 1], HEX);
-  macID.toUpperCase();
-  myID = macID;
+
 
   MyServer.begin();
 
@@ -789,6 +889,7 @@ void setup()
   rest.function("blinkPixelCommand", blinkPixelCommand);
   rest.function("setStationName", setStationName);
   rest.function("setClockOffset", setClockOffset);
+  rest.function("setSensorCycle", setSensorCycle);
 
   rest.function("updateSGS", updateSGS);
 
@@ -805,7 +906,7 @@ void setup()
   Serial.print("CPU1 reset reason: ");
   print_reset_reason(rtc_get_reset_reason(1));
 
-    // send debug boot up MQTT message
+  // send debug boot up MQTT message
 #ifdef SGS2EXTDEBUG
   String myMQTTMessage;
   myMQTTMessage = SGSEXTENDERESP32VERSION;
@@ -900,8 +1001,8 @@ void loop() {
 
   while (1)
   {
-    //sendMQTT(MQTTTESTMESSAGE);
-    delay(5000);
+    MQTTclient.loop();
+    vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 
 

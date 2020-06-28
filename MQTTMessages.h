@@ -5,3 +5,9 @@
 #define MQTTALARM       2
 #define MQTTDEBUG       3
 #define MQTTSENSORS     4
+
+
+
+// received Messages
+
+#define MQTTPUBVALVESET 10

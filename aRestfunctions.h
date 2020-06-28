@@ -29,7 +29,7 @@ String getValue(String data, char separator, int index)
 // general commands
 
 int checkForID(String command) {
-  Serial.println("checkForID");
+  Serial.println("---------->REST: checkForID");
   Serial.print("Command =");
   Serial.println(command);
 
@@ -56,7 +56,7 @@ int blinkPixelCommand(String command) {
 
 
   RESTreturnString = "";
-  Serial.println("blinkPixelCommand");
+  Serial.println("---------->REST: blinkPixelCommand");
   Serial.print("Command =");
   Serial.println(command);
   String password;
@@ -86,6 +86,10 @@ int checkSystem(String command) {
 
 int getValveState(String command) {
 
+
+  Serial.println("---------->REST: getValveState");
+  Serial.print("Command =");
+  Serial.println(command);
   RESTreturnString = "";
 
 
@@ -110,7 +114,7 @@ int enableMoistureSensors(String command) {
 
   // admin password, enableMoisture0, enableMoisture1, ....
   RESTreturnString = "";
-  Serial.println("readMoistureSensors");
+  Serial.println("---------->REST: enableMoistureSensors");
   Serial.print("Command =");
   Serial.println(command);
   String password;
@@ -138,14 +142,14 @@ int readMoistureSensors(String command) {
 
   // command format:     adminpassworde
   RESTreturnString = "";
-  Serial.println("readMoistureSensors");
+  Serial.println("---------->REST: readMoistureSensors");
   Serial.print("Command =");
   Serial.println(command);
   String password;
   password = getValue(command, ',', 0);
   if (password == adminPassword)
   {
-    xSemaphoreTake( xSemaphoreSensorsBeingRead, 10000);
+    xSemaphoreTake( xSemaphoreSensorsBeingRead, 30000);
     int i;
 
     readSensors();
@@ -173,7 +177,7 @@ int  setSingleValve(String command) {
 
   // command format:     adminpassword, valvenumber, valvelength
   RESTreturnString = "";
-  Serial.println("setSingleValve");
+  Serial.println("---------->REST: setSingleValve");
   Serial.print("Command =");
   Serial.println(command);
   String password;
@@ -236,7 +240,7 @@ int setValves(String command) {
 
 
   RESTreturnString = "";
-  Serial.println("setValves");
+  Serial.println("---------->REST: setValves");
   Serial.print("Command =");
   Serial.println(command);
   String password;
@@ -283,7 +287,7 @@ int ledControl(String command) {
 
   // Get state from command
   RESTreturnString = "";
-
+  Serial.println("---------->REST: ledControl");
   Serial.print("Command =");
   Serial.println(command);
   int state = command.toInt();
@@ -295,6 +299,7 @@ int ledControl(String command) {
 int setAdminPassword(String command)
 {
   RESTreturnString = "";
+  Serial.println("---------->REST: setAdminPassword");
   Serial.print("Command =");
   Serial.println(command);
 
@@ -324,6 +329,7 @@ int setAdminPassword(String command)
 int setStationName(String command)
 {
   RESTreturnString = "";
+  Serial.println("---------->REST: setStationName");
   Serial.print("Command =");
   Serial.println(command);
 
@@ -347,10 +353,48 @@ int setStationName(String command)
 
 }
 
+int setSensorCycle(String command)
+{
+  RESTreturnString = "";
+  Serial.println("---------->REST: setSensorCycle");
+  Serial.print("Command =");
+  Serial.println(command);
+
+
+  String Password;
+  String newCycle;
+  int newSensorCycle;
+
+  Password = getValue(command, ',', 0);
+  newCycle = getValue(command, ',', 1);
+
+  if (Password == adminPassword)
+  {
+    newSensorCycle = newCycle.toInt();
+    if (newSensorCycle < 5){
+      return 0;
+    }
+    else
+    {
+      sensorCycle = newSensorCycle;
+    }
+      
+    writePreferences();
+    return 1;
+  }
+  else
+    return 0;
+
+  return 1;
+
+}
+
+
 
 int setClockOffset(String command)
 {
   RESTreturnString = "";
+  Serial.println("---------->REST: setClockOffset");
   Serial.print("Command =");
   Serial.println(command);
 
@@ -377,7 +421,7 @@ int setClockOffset(String command)
 
 int resetSGS2Ext(String command) {
   RESTreturnString = "";
-  Serial.println("resetSGS2Ext - settings invalidated");
+  Serial.println("---------->REST: resetSGS2Ext - settings invalidated");
   Serial.print("Command =");
   Serial.println(command);
   if (command == adminPassword)
@@ -403,7 +447,7 @@ int updateSGS(String command)
 {
 
   WiFiClient client;
-  Serial.println("updateSGS");
+  Serial.println("---------->REST: updateSGS");
   Serial.print("Command =");
   Serial.println(command);
   RESTreturnString = "";
@@ -453,7 +497,7 @@ int updateSGS(String command)
 
 
 
-    //t_httpUpdate_return ret = httpUpdate.update("www.switchdoc.com", 80, "/OurWeatherUpdater.php", WEATHERPLUSESP32VERSION);
+
     String fwImageURL;
     newFWVersion.trim();
     fwImageURL = "http://www.switchdoc.com/binSGS/SGS2-" + newFWVersion + ".bin";
