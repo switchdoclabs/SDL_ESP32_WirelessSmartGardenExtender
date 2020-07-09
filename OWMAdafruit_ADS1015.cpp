@@ -171,7 +171,7 @@ uint16_t Adafruit_ADS1015::readADC_SingleEnded(uint8_t channel) {
       config |= ADS1015_REG_CONFIG_MUX_SINGLE_3;
       break;
   }
- 
+
 
   // Set 'start single-conversion' bit
   config |= ADS1015_REG_CONFIG_OS_SINGLE;
@@ -180,7 +180,8 @@ uint16_t Adafruit_ADS1015::readADC_SingleEnded(uint8_t channel) {
   writeRegister(m_i2cAddress, ADS1015_REG_POINTER_CONFIG, config);
   //  Serial.print("Config");Serial.println(config, HEX);
   // Wait for the conversion to complete
-  delay(m_conversionDelay);
+
+  vTaskDelay(m_conversionDelay / portTICK_PERIOD_MS);
 
   // Read the conversion results
   // Shift 12-bit results right 4 bits for the ADS1015
@@ -217,7 +218,8 @@ int16_t Adafruit_ADS1015::readADC_Differential_0_1() {
   writeRegister(m_i2cAddress, ADS1015_REG_POINTER_CONFIG, config);
 
   // Wait for the conversion to complete
-  delay(m_conversionDelay);
+  vTaskDelay(m_conversionDelay / portTICK_PERIOD_MS);
+
 
   // Read the conversion results
   uint16_t res = readRegister(m_i2cAddress, ADS1015_REG_POINTER_CONVERT) >> m_bitShift;
@@ -268,8 +270,8 @@ int16_t Adafruit_ADS1015::readADC_Differential_2_3() {
   writeRegister(m_i2cAddress, ADS1015_REG_POINTER_CONFIG, config);
 
   // Wait for the conversion to complete
-  delay(m_conversionDelay);
 
+  vTaskDelay(m_conversionDelay / portTICK_PERIOD_MS);
   // Read the conversion results
   uint16_t res = readRegister(m_i2cAddress, ADS1015_REG_POINTER_CONVERT) >> m_bitShift;
   if (m_bitShift == 0)
@@ -347,8 +349,8 @@ void Adafruit_ADS1015::startComparator_SingleEnded(uint8_t channel, int16_t thre
 int16_t Adafruit_ADS1015::getLastConversionResults()
 {
   // Wait for the conversion to complete
-  delay(m_conversionDelay);
 
+  vTaskDelay(m_conversionDelay / portTICK_PERIOD_MS);
   // Read the conversion results
   uint16_t res = readRegister(m_i2cAddress, ADS1015_REG_POINTER_CONVERT) >> m_bitShift;
   if (m_bitShift == 0)

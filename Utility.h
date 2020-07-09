@@ -67,15 +67,15 @@ float returnPercentLeftInBattery(float currentVoltage, float maxVolt)
 String returnDateTime(time_t myTime)
 {
 
-char buff[40];
+  char buff[40];
 
-struct tm *myTm;
-myTm = localtime(&myTime);
-strftime(buff, 20, "%Y-%m-%d %H:%M:%S", myTm);
-String returnString;
-returnString = String(buff);
+  struct tm *myTm;
+  myTm = localtime(&myTime);
+  strftime(buff, 20, "%Y-%m-%d %H:%M:%S", myTm);
+  String returnString;
+  returnString = String(buff);
 
-return returnString;
+  return returnString;
 
 }
 
@@ -87,10 +87,11 @@ void blinkLED(int timesToBlink, int delayBetweenBlinks)
   for (i = 0; i < timesToBlink; i++)
   {
     digitalWrite(BLINKPIN, 1);
-    delay(delayBetweenBlinks/2);
+
+    vTaskDelay(delayBetweenBlinks / 2 / portTICK_PERIOD_MS);
 
     digitalWrite(BLINKPIN, 0);
-    delay(delayBetweenBlinks/2);
+    vTaskDelay(delayBetweenBlinks / 2 / portTICK_PERIOD_MS);
   }
 
 }
@@ -134,7 +135,7 @@ String return_reset_reason(RESET_REASON reason)
     case 8 : Reason = "TG1WDT_SYS_RESET"; break;      /**<8, Timer Group1 Watch dog reset digital core*/
     case 9 : Reason = "RTCWDT_SYS_RESET"; break;      /**<9, RTC Watch dog Reset digital core*/
     case 10 : Reason = "INTRUSION_RESET"; break;      /**<10, Instrusion tested to reset CPU*/
-    case 11 :Reason = "TGWDT_CPU_RESET"; break;      /**<11, Time Group reset CPU*/
+    case 11 : Reason = "TGWDT_CPU_RESET"; break;     /**<11, Time Group reset CPU*/
     case 12 : Reason = "SW_CPU_RESET"; break;         /**<12, Software reset CPU*/
     case 13 : Reason = "RTCWDT_CPU_RESET"; break;     /**<13, RTC Watch dog Reset CPU*/
     case 14 : Reason = "EXT_CPU_RESET"; break;        /**<14, for APP CPU, reseted by PRO CPU*/
@@ -143,7 +144,7 @@ String return_reset_reason(RESET_REASON reason)
     default : Reason = "NO_MEANING";
   }
   return Reason;
-  
+
 }
 
 void SetRandomSeed()

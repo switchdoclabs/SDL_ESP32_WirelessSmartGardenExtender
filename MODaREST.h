@@ -158,7 +158,7 @@
 // Default number of max. exposed functions
 #ifndef NUMBER_FUNCTIONS
 #if defined(__AVR_ATmega1280__) || defined(ESP32) || defined(__AVR_ATmega2560__) || defined(CORE_WILDFIRE) || defined(ESP8266)
-#define NUMBER_FUNCTIONS 25
+#define NUMBER_FUNCTIONS 27
 #else
 #define NUMBER_FUNCTIONS 5
 #endif
@@ -436,7 +436,7 @@ class aREST {
 #if defined(ESP8266)|| defined (ESP32)
         Serial.print("Memory loss:");
         Serial.println(freeMemory - ESP.getFreeHeap(), DEC);
-       freeMemory = ESP.getFreeHeap();
+        freeMemory = ESP.getFreeHeap();
 #endif
         Serial.print(F("Added to buffer as progmem: "));
         Serial.println(toAdd);
@@ -873,7 +873,9 @@ class aREST {
 
         // Get the server answer
         char c = serial.read();
-        delay(read_delay);
+
+        vTaskDelay(read_delay / portTICK_PERIOD_MS);
+
         answer = answer + c;
         //if (DEBUG_MODE) {Serial.print(c);}
 
@@ -1021,7 +1023,7 @@ class aREST {
           Serial.println(F(" try again in 5 seconds"));
 
           // Wait 5 seconds before retrying
-          delay(5000);
+          vTaskDelay(10 / portTICK_PERIOD_MS);
         }
 
       }
@@ -1836,7 +1838,8 @@ class aREST {
 #endif
 
           // Wait for client to get data
-          delay(wait_time);
+
+          vTaskDelay(wait_time / portTICK_PERIOD_MS);
 
           if (DEBUG_MODE) {
             Serial.print(F("Sent buffer: "));

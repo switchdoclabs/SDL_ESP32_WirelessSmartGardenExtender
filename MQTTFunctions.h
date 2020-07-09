@@ -13,7 +13,7 @@ int sendMQTT(int messageType, String argument)
   String SendString;
 
   if (!MQTTclient.connected()) {
-    MQTTreconnect();
+    MQTTreconnect(true);
   }
   MQTTclient.loop();
 

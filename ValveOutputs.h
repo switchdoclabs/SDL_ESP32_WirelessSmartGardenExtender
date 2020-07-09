@@ -92,14 +92,37 @@ void writeGPIOBit(byte pin, byte value)
   currentValue = sx1502.readGPIO();
   if (currentValue == 0xFF)  // read again
   {
-    delay(100);
-    currentValue = sx1502.readGPIO();
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    bool correct;
+    correct = true;
+
     // check to see if it is actually supposed to be 0xFF
 
-    String message;
-    message = "First Read 0xFF, Second Read Current Value:" + String(currentValue);
-    
-    sendMQTT(MQTTDEBUG, message);
+    int i;
+
+    for (i = 0; i < 4; i++)
+    {
+      if ((moistureSensorEnable[i] == 0) || (valveState[i] == 0))
+      {
+
+
+        correct = false;
+        Serial.println("writeGPIO - 0xFF found to be wrong");
+        break;
+      }
+
+
+    }
+    currentValue = sx1502.readGPIO();
+
+    if (correct == false)
+    {
+
+      String message;
+      message = "Recovery:  First Read 0xFF, Second Read Current Value:" + String(currentValue);
+
+      sendMQTT(MQTTDEBUG, message);
+    }
 
 
   }
@@ -167,24 +190,29 @@ void writeGPIOBit(byte pin, byte value)
 
       }
       sendMQTT(MQTTDEBUG, temp);
-      delay(5000);
-      Serial.println("0xFF detected - LOCKING CPU");
-
-      while (digitalRead(15) == 1)
-      {
-
-        delay(5000);
-        Serial.println("Waiting for Unlock GPIO15");
-      }
-      Serial.println("UNLOCKING CPU");
 
 
-      i = 343 / 0;
-      Serial.print (i);
+      sendMQTT(MQTTDEBUG, "Optional CPU LOCK");
+      /*
+            delay(5000);
+            Serial.println("0xFF detected - LOCKING CPU");
+
+           while (digitalRead(15) == 1)
+           {
+
+             delay(5000);
+             Serial.println("Waiting for Unlock GPIO15");
+           }
+           Serial.println("UNLOCKING CPU");
+
+
+           i = 343 / 0;
+           Serial.print (i);
+
+      */
     }
     else
       Serial.println("writeGPIO - 0xFF found to be correct");
-
 
 
   }
@@ -326,7 +354,34 @@ void turnOnAppropriateValves()
   int i;
   bool valveChange = false;
 
-  for (i = 0; i < 8; i++)
+  // do all the GPIO Valves at once rather than individual
+
+  int writeValue = 0;
+
+
+
+  for (i = 0; i < 4; i++)
+  {
+    writeValue = writeValue + valveState[i];
+    writeValue = writeValue << 1;
+
+  }
+  writeValue = writeValue << 4;
+
+
+
+  // read GPIO
+  int currentValue;
+  xSemaphoreTake( xSemaphoreUseI2C, portMAX_DELAY);
+  currentValue = sx1502.readGPIO();
+
+  writeValue = (currentValue & 0xF0) | writeValue;
+  // write GPIO byte
+  sx1502.writeGPIO(writeValue);
+
+  xSemaphoreGive( xSemaphoreUseI2C);
+
+  for (i = 4; i < 8; i++)
   {
     if (valveState[i] == 1)
     {

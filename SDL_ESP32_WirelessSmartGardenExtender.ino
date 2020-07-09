@@ -8,7 +8,7 @@
 
 
 
-#define SGSEXTENDERESP32VERSION "018"
+#define SGSEXTENDERESP32VERSION "021"
 
 
 #define CONTROLLERBOARD "V1"
@@ -329,7 +329,7 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
         break;
       }
     default:
-    
+
       Serial.print("unsupported incoming MQTT Message:");
 
       Serial.print(buffer);
@@ -344,7 +344,7 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
 
 
 
-void MQTTreconnect() {
+void MQTTreconnect(bool reboot) {
   // Loop until we're reconnected
   if (!MQTTclient.connected()) {
     int i = 0;
@@ -376,20 +376,23 @@ void MQTTreconnect() {
         Serial.print(MQTTclient.state());
         Serial.println(" try again in 2 seconds");
         // Wait 2 seconds before retrying
-        delay(2000);
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
 
       }
       i++;
     }
     // check for 5 failures and then reboot
-    if (i == 5)
+    if ((i >= 5) && (reboot == true))
     {
-      // Force Exception and reboot
+      if (MQTT_IP != "")   // dont reboot if no MQTT IP yet.
+      {
+        // Force Exception and reboot
 
-      int j;
+        int j;
 
-      j = 343 / 0;
-      Serial.print (i);
+        j = 343 / 0;
+        Serial.print (j);
+      }
     }
   }
 }
@@ -776,7 +779,7 @@ void setup()
     MQTTclient.setServer(MQTT_IP.c_str(), MQTT_PORT);
     MQTTclient.setCallback(MQTTcallback);
     //blinkIPAddress();
-    MQTTreconnect();
+    MQTTreconnect(true);
 
 
     updateDisplay(DISPLAY_IPDISPLAY);
@@ -890,6 +893,7 @@ void setup()
   rest.function("setStationName", setStationName);
   rest.function("setClockOffset", setClockOffset);
   rest.function("setSensorCycle", setSensorCycle);
+  rest.function("restartMQTT", restartMQTT);
 
   rest.function("updateSGS", updateSGS);
 

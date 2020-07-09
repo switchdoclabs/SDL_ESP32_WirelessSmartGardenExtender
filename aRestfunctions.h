@@ -51,6 +51,32 @@ int checkForID(String command) {
 
 }
 
+int restartMQTT(String command) {
+  Serial.println("---------->REST: restartMQTT");
+  Serial.print("Command =");
+  Serial.println(command);
+  String password;
+  password = getValue(command, ',', 0);
+  if (password == adminPassword)
+  {
+
+
+    RESTreturnString = "";
+
+    MQTTclient.setServer(MQTT_IP.c_str(), MQTT_PORT);
+    MQTTclient.setCallback(MQTTcallback);
+    //blinkIPAddress();
+    MQTTreconnect(true);
+
+
+  }
+  else
+    return 1;
+  return 0;
+
+}
+
+
 
 int blinkPixelCommand(String command) {
 
@@ -371,14 +397,14 @@ int setSensorCycle(String command)
   if (Password == adminPassword)
   {
     newSensorCycle = newCycle.toInt();
-    if (newSensorCycle < 5){
+    if (newSensorCycle < 5) {
       return 0;
     }
     else
     {
       sensorCycle = newSensorCycle;
     }
-      
+
     writePreferences();
     return 1;
   }
@@ -459,7 +485,7 @@ int updateSGS(String command)
   if (command == adminPassword)
   {
     updateDisplay(DISPLAY_UPDATING);
-    delay(5000);
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
     String fwVersionURL;
     fwVersionURL = "http://www.switchdoc.com/binSGS/SGSWExtCurrentFirmware.html";
     // Get the values for the update software
@@ -508,7 +534,7 @@ int updateSGS(String command)
         Serial.println("[update] Update failed.");
         RESTreturnString = "[update] Update failed.";
         updateDisplay(DISPLAY_NO_UPDATE_FAILED);
-        delay(5000);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
         xSemaphoreGive( xSemaphoreRESTCommand);
         xSemaphoreGive( xSemaphorePixelPulse); //Restart the flashing
         return 1;
@@ -520,7 +546,7 @@ int updateSGS(String command)
         RESTreturnString = "[update] Update no Updates.";
         updateDisplay(DISPLAY_NO_UPDATE_AVAILABLE);
 
-        delay(5000);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
         xSemaphoreGive( xSemaphoreRESTCommand);
         xSemaphoreGive( xSemaphorePixelPulse); //Restart the flashing
         return 2;

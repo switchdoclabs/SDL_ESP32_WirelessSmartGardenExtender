@@ -33,7 +33,7 @@ bool SmartConfigGetIP(long waitForStartSeconds, long secondsToWaitAfterStart)
   esp_err_t error_code = 0;
 
 
-    //WiFi.mode(WIFI_AP_STA);
+  //WiFi.mode(WIFI_AP_STA);
   WiFi.mode(WIFI_AP);
 
   WiFi.beginSmartConfig();
@@ -62,8 +62,8 @@ bool SmartConfigGetIP(long waitForStartSeconds, long secondsToWaitAfterStart)
           blinkLED(5, 300);  // blink five OK!
           break;
         }
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 
-        delay(500);
         Serial.print(".");
         //blinkLED(2, 300);  // blink 2 in progress
         myWiFiPresent = false;
@@ -260,7 +260,7 @@ bool localAPGetIP(long apTimeOutSeconds)
 
     Serial.println("failed to connect and hit timeout");
 
-    
+
 
     //reset and try again, or maybe put it to deep sleep
     //ESP.reset();
@@ -300,12 +300,13 @@ void WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
 
       }
       esp_wifi_wps_disable();
-      delay(10);
+
+      vTaskDelay(10 / portTICK_PERIOD_MS);
       break;
     case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
       Serial.println("WPS Successful, stopping WPS and connecting to: " + String(WiFi.SSID()));
       esp_wifi_wps_disable();
-      delay(10);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
       WiFi.begin();
       break;
     case SYSTEM_EVENT_STA_WPS_ER_FAILED:

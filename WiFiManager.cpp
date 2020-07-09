@@ -113,8 +113,8 @@ void WiFiManager::setupConfigPortal() {
   } else {
     WiFi.softAP(_apName);
   }
+  vTaskDelay(500 / portTICK_PERIOD_MS);// Without delay I've seen the IP address blank
 
-  delay(500); // Without delay I've seen the IP address blank
   DEBUG_WM(F("AP IP address: "));
   DEBUG_WM(WiFi.softAPIP());
 
@@ -209,7 +209,7 @@ boolean  WiFiManager::startConfigPortal(char const *apName, char const *apPasswo
 
     if (connect) {
       connect = false;
-      delay(2000);
+      vTaskDelay(2000 / portTICK_PERIOD_MS);
       DEBUG_WM(F("Connecting to new AP"));
 
       // using user-provided  _ssid, _pass in place of system-stored ssid and pass
@@ -310,8 +310,8 @@ uint8_t WiFiManager::waitForConnectResult() {
       if (status == WL_CONNECTED || status == WL_CONNECT_FAILED) {
         keepConnecting = false;
       }
-      delay(100);
- 
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+
     }
     return status;
   }
@@ -501,7 +501,10 @@ void WiFiManager::handleWifi(boolean scan) {
           }
           //DEBUG_WM(item);
           page += item;
-          delay(0);
+
+          vTaskDelay(0 / portTICK_PERIOD_MS);
+
+
         } else {
           DEBUG_WM(F("Skipping due to quality"));
         }
@@ -584,7 +587,7 @@ void WiFiManager::handleWifi(boolean scan) {
 
 /** Handle the WLAN save form and redirect to WLAN config page again */
 /*
-void WiFiManager::handleWifiSave() {
+  void WiFiManager::handleWifiSave() {
   DEBUG_WM(F("WiFi save"));
 
   //SAVE/connect here
@@ -643,7 +646,7 @@ void WiFiManager::handleWifiSave() {
   DEBUG_WM(F("Sent wifi save page"));
 
   connect = true; //signal ready to connect/reset
-}
+  }
 
 
 */
@@ -659,7 +662,7 @@ void WiFiManager::handleWifiSave() {
   //SAVE/connect here
   _name   = server->arg("n").c_str();
   _ssid = server->arg("s").c_str();
-  _pass = server->arg("p").c_str(); 
+  _pass = server->arg("p").c_str();
 
 
   Wssid = _ssid;
@@ -710,7 +713,7 @@ void WiFiManager::handleWifiSave() {
   }
   // set clock if requested
 
- 
+
   String page = FPSTR(HTTP_HEAD);
   page.replace("{v}", "Credentials Saved");
   page += FPSTR(HTTP_SCRIPT);
@@ -795,13 +798,13 @@ void WiFiManager::handleReset() {
   server->send(200, "text/html", page);
 
   DEBUG_WM(F("Sent reset page"));
-  delay(5000);
+  vTaskDelay(5000 / portTICK_PERIOD_MS);
 #if defined(ESP8266)
   ESP.reset();
 #else
   ESP.restart();
 #endif
-  delay(2000);
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
 }
 
 void WiFiManager::handleNotFound() {

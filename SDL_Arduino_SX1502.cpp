@@ -39,7 +39,7 @@ void SDL_Arduino_SX1502::wireWriteRegister (uint8_t reg, uint8_t value)
 #if ARDUINO >= 100
 
   Wire.write(reg);
-  delay(100);
+  vTaskDelay(100 / portTICK_PERIOD_MS);
   // Register
 
   // Lower 8-bits

@@ -31,11 +31,11 @@ void updateDisplay(int displayMode)
     char buffer[40];
     char returnString[200];
     /*
-#ifdef SGS2EXTDEBUG
-    Serial.print("displayMode=");
-    Serial.println(displayMode);
-#endif
-*/
+      #ifdef SGS2EXTDEBUG
+      Serial.print("displayMode=");
+      Serial.println(displayMode);
+      #endif
+    */
     String windDirection;
 
     //Serial.print("StartofupdateDisplay xi2c=");
@@ -241,10 +241,10 @@ void updateDisplay(int displayMode)
         }
         break;
 
-        case DISPLAY_IPNAMEID:
-     
+      case DISPLAY_IPNAMEID:
+
         {
- 
+
           setDisplayLine(0, "IP Address:");
 
           IPAddress myIp2 = WiFi.localIP();
@@ -253,7 +253,7 @@ void updateDisplay(int displayMode)
           sprintf(buffer, "%s / %s", stationName.c_str(), myID.c_str());
           setDisplayLine(2, buffer);
         }
-        break;   
+        break;
 
       case DISPLAY_STATUS:
 
@@ -275,11 +275,11 @@ void updateDisplay(int displayMode)
       case DISPLAY_MOISTURE_4:
 
         int unit;
-        unit = displayMode - DISPLAY_MOISTURE_1;
+        unit = displayMode - DISPLAY_MOISTURE_1 + 1;
 
         // Displays Moisture Levels
         buffer[0] = '\0';
-        sprintf(buffer, "MSensor #%i", unit+1);
+        sprintf(buffer, "MSensor #%i", unit);
         setDisplayLine(0, buffer);
         buffer[0] = '\0';
         sprintf(buffer, "%3.1f%%", moistureSensors[unit]);
@@ -576,7 +576,7 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
       display.drawBitmap(icons[f][XPOS], icons[f][YPOS], logo16_glcd_bmp, w, h, WHITE);
     }
     display.display();
-    delay(200);
+    vTaskDelay(200 / portTICK_PERIOD_MS);
 
     // then erase it + move it
     for (uint8_t f = 0; f < NUMFLAKES; f++) {
@@ -679,7 +679,7 @@ void testdrawline() {
     display.drawLine(0, 0, display.width() - 1, i, WHITE);
     display.display();
   }
-  delay(250);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
 
   display.clearDisplay();
   for (int16_t i = 0; i < display.width(); i += 4) {
@@ -690,7 +690,7 @@ void testdrawline() {
     display.drawLine(0, display.height() - 1, display.width() - 1, i, WHITE);
     display.display();
   }
-  delay(250);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
 
   display.clearDisplay();
   for (int16_t i = display.width() - 1; i >= 0; i -= 4) {
@@ -701,7 +701,7 @@ void testdrawline() {
     display.drawLine(display.width() - 1, display.height() - 1, 0, i, WHITE);
     display.display();
   }
-  delay(250);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
 
   display.clearDisplay();
   for (int16_t i = 0; i < display.height(); i += 4) {
@@ -712,7 +712,7 @@ void testdrawline() {
     display.drawLine(display.width() - 1, 0, i, display.height() - 1, WHITE);
     display.display();
   }
-  delay(250);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
 }
 
 void testscrolltext(void) {
@@ -724,17 +724,17 @@ void testscrolltext(void) {
   display.display();
 
   display.startscrollright(0x00, 0x0F);
-  delay(2000);
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
   display.stopscroll();
-  delay(1000);
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
   display.startscrollleft(0x00, 0x0F);
-  delay(2000);
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
   display.stopscroll();
-  delay(1000);
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
   display.startscrolldiagright(0x00, 0x07);
-  delay(2000);
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
   display.startscrolldiagleft(0x00, 0x07);
-  delay(2000);
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
   display.stopscroll();
 }
 
@@ -754,7 +754,7 @@ void OLEDDisplaySetup()   {
   // Since the buffer is intialized with an Adafruit splashscreen
   // internally, this will display the splashscreen.
   display.display();
-  delay(4000);
+  vTaskDelay(4000 / portTICK_PERIOD_MS);
 
   // Clear the buffer.
   display.clearDisplay();
