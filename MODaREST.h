@@ -1805,12 +1805,12 @@ class aREST {
 
       if (DEBUG_MODE) {
 #if defined(ESP8266)|| defined (ESP32)
-        Serial.print("Memory loss before sending:");
-        Serial.println(freeMemory - ESP.getFreeHeap(), DEC);
+        //Serial.print("Memory loss before sending:");
+        //Serial.println(freeMemory - ESP.getFreeHeap(), DEC);
         freeMemory = ESP.getFreeHeap();
 #endif
-        Serial.print(F("Buffer size: "));
-        Serial.println(index);
+        //Serial.print(F("Buffer size: "));
+        //Serial.println(index);
       }
 
       // Send all of it
@@ -1850,12 +1850,12 @@ class aREST {
 
       if (DEBUG_MODE) {
 #if defined(ESP8266) || defined (ESP32)
-        Serial.print("Memory loss after sending:");
-        Serial.println(freeMemory - ESP.getFreeHeap(), DEC);
+        //Serial.print("Memory loss after sending:");
+        //Serial.println(freeMemory - ESP.getFreeHeap(), DEC);
         freeMemory = ESP.getFreeHeap();
 #endif
-        Serial.print(F("Buffer size: "));
-        Serial.println(index);
+        //Serial.print(F("Buffer size: "));
+        //Serial.println(index);
       }
 
       // Reset the buffer

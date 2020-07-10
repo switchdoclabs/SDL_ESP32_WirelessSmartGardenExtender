@@ -8,7 +8,7 @@
 
 
 
-#define SGSEXTENDERESP32VERSION "021"
+#define SGSEXTENDERESP32VERSION "022"
 
 
 #define CONTROLLERBOARD "V1"
@@ -928,13 +928,13 @@ void setup()
     updateDisplay(DISPLAY_POWERUP);
   }
 
-  Serial.print("Pre Initial State SetupxSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+ // Serial.print("Pre Initial State SetupxSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   // initialize valves
   initialState();
 
-  Serial.print("Post Initial State SetupxSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  //Serial.print("Post Initial State SetupxSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
 
   xTaskCreatePinnedToCore(
     taskReadSensors,          /* Task function. */
@@ -944,8 +944,8 @@ void setup()
     2,                /* Priority of the task. */
     NULL,             /* Task handle. */
     1);               // Specific Core
-  Serial.print("Pre taskREST SetupxSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  //Serial.print("Pre taskREST SetupxSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
 
   xTaskCreatePinnedToCore(
     taskRESTCommand,          /* Task function. */
@@ -955,8 +955,8 @@ void setup()
     3,                /* Priority of the task. */
     NULL,             /* Task handle. */
     1);               // Specific Core
-  Serial.print("Pre taskSetValues SetupxSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  //Serial.print("Pre taskSetValues SetupxSemaphoreUseI2C=");
+ // Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   xTaskCreatePinnedToCore(
     taskSetValves,          /* Task function. */
     "taskSetValves",        /* String with name of task. */
@@ -965,8 +965,8 @@ void setup()
     3,                /* Priority of the task. */
     NULL,             /* Task handle. */
     1);               // Specific Core
-  Serial.print("Pre taskSetValues SetupxSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  //Serial.print("Pre taskSetValues SetupxSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   xTaskCreatePinnedToCore(
     taskPixelCommand,          /* Task function. */
     "TaskPixelCommand",        /* String with name of task. */
@@ -986,13 +986,13 @@ void setup()
     0);               // Specific Core
   Serial.println("RTOS Tasks Starting");
 
-  Serial.print("EndSetupxSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  //Serial.print("EndSetupxSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   // Start OLED Loop
 
   vTaskDelay(2000 / portTICK_PERIOD_MS);
-  Serial.print("BUpdateSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  //Serial.print("BUpdateSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   xSemaphoreGive( xSemaphoreOLEDLoopUpdate);   // initialize it on
 
 

@@ -103,7 +103,9 @@ void printSensors()
   {
     if (moistureSensorEnable[i] == 1)
     {
+#ifdef SGS2EXTDEBUG
       Serial.print("Channel: "); Serial.print(i + 1); Serial.print("   Scaled:"); Serial.println (moistureSensors[i]);
+#endif
       if (printone == false) printone = true;
     }
 

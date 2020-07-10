@@ -192,7 +192,7 @@ void writeGPIOBit(byte pin, byte value)
       sendMQTT(MQTTDEBUG, temp);
 
 
-      sendMQTT(MQTTDEBUG, "Optional CPU LOCK");
+      //sendMQTT(MQTTDEBUG, "Optional CPU LOCK");
       /*
             delay(5000);
             Serial.println("0xFF detected - LOCKING CPU");
@@ -212,7 +212,9 @@ void writeGPIOBit(byte pin, byte value)
       */
     }
     else
-      Serial.println("writeGPIO - 0xFF found to be correct");
+      {
+        //Serial.println("writeGPIO - 0xFF found to be correct");
+      }
 
 
   }
@@ -270,8 +272,8 @@ void writeRelay(byte pin, byte value)
   }
 
   xSemaphoreGive( xSemaphoreUseI2C);
-  Serial.print("PTWRxSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  //Serial.print("PTWRxSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
 }
 
 
@@ -297,8 +299,8 @@ void initializeValvesAndSensors()
 
 int writeValve(int number, byte OnOff)
 {
-  Serial.print("WVxSemaphoreUseI2C=");
-  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  //Serial.print("WVxSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
 
 
   switch (number)
@@ -307,9 +309,9 @@ int writeValve(int number, byte OnOff)
     case 2:
     case 3:
     case 4:
-      Serial.println("Before writeGPIOBit");
-      Serial.print("number=");
-      Serial.println(number);
+      //Serial.println("Before writeGPIOBit");
+      //Serial.print("number=");
+      //Serial.println(number);
       // read the GPIO Port to check corruption
       writeGPIOBit(number + 3, OnOff);
 
@@ -319,7 +321,7 @@ int writeValve(int number, byte OnOff)
     case 6:
     case 7:
     case 8:
-      Serial.println("Before writeRelay");
+      //Serial.println("Before writeRelay");
       writeRelay(number - 4, OnOff);
       break;
 
@@ -356,31 +358,51 @@ void turnOnAppropriateValves()
 
   // do all the GPIO Valves at once rather than individual
 
-  int writeValue = 0;
-
-
+  int myWriteValue = 0;
 
   for (i = 0; i < 4; i++)
   {
-    writeValue = writeValue + valveState[i];
-    writeValue = writeValue << 1;
 
+    Serial.print("valveState[");
+    Serial.print(i);
+    Serial.print("]=");
+    Serial.println(valveState[i]);
+
+    if (valveState[i] == 1)
+    {
+      valveChange = true;
+    }
   }
-  writeValue = writeValue << 4;
 
 
+
+  myWriteValue =  ((valveState[3]) << 3)  + ((valveState[2]) << 2) + ((valveState[1]) << 1) + (valveState[0]);
+  Serial.print(">>>>>B4myWriteValue=");
+  Serial.println(myWriteValue, HEX);
+  myWriteValue = myWriteValue << 4;
+
+
+
+  Serial.print(">>>>>myWriteValue=");
+  Serial.println(myWriteValue, HEX);
 
   // read GPIO
   int currentValue;
+  Serial.print("BBWriteGPIOxSemaphoreUseI2C=");
+  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   xSemaphoreTake( xSemaphoreUseI2C, portMAX_DELAY);
+  Serial.print("AFTERRTakeBBWriteGPIOxSemaphoreUseI2C=");
+  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   currentValue = sx1502.readGPIO();
 
-  writeValue = (currentValue & 0xF0) | writeValue;
+  myWriteValue = (currentValue & 0xF0) | myWriteValue;
   // write GPIO byte
-  sx1502.writeGPIO(writeValue);
+  sx1502.writeGPIO(myWriteValue);
 
   xSemaphoreGive( xSemaphoreUseI2C);
 
+  Serial.print("ABWriteGPIOxSemaphoreUseI2C=");
+  Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   for (i = 4; i < 8; i++)
   {
     if (valveState[i] == 1)

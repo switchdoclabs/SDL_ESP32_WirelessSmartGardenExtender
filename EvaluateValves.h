@@ -27,9 +27,9 @@ void evaluateValves(int timeDecrementMS)
         valveTime[i] = 0.0;
         valveState[i] = 0;
         writeValve(i + 1, 0);
-        Serial.print("valve #:");
-        Serial.print(i + 1);
-        Serial.println(" Turned Off");
+        //Serial.print("valve #:");
+        //Serial.print(i + 1);
+        //Serial.println(" Turned Off");
         valveChange = true;
       }
 

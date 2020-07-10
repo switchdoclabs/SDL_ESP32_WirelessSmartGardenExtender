@@ -139,8 +139,8 @@ uint8_t SDL_Arduino_SX1502::writeGPIO(uint8_t value) {
 
   wireWriteRegister(SX1502_REGDATA_ADDR, value);
 
-  Serial.print("writeGPIO: Value = 0x");
-  Serial.println(value, HEX);
+  //Serial.print("writeGPIO: Value = 0x");
+  //Serial.println(value, HEX);
  
   //Serial.print("GPIO Write Raw=");
   //Serial.println(value,HEX);
