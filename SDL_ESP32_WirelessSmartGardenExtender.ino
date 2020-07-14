@@ -8,7 +8,7 @@
 
 
 
-#define SGSEXTENDERESP32VERSION "022"
+#define SGSEXTENDERESP32VERSION "024"
 
 
 #define CONTROLLERBOARD "V1"
@@ -928,7 +928,7 @@ void setup()
     updateDisplay(DISPLAY_POWERUP);
   }
 
- // Serial.print("Pre Initial State SetupxSemaphoreUseI2C=");
+  // Serial.print("Pre Initial State SetupxSemaphoreUseI2C=");
   //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   // initialize valves
   initialState();
@@ -939,7 +939,18 @@ void setup()
   xTaskCreatePinnedToCore(
     taskReadSensors,          /* Task function. */
     "taskReadSensors",        /* String with name of task. */
-    10000,            /* Stack size in words. */
+    7000,            /* Stack size in words. */
+    NULL,             /* Parameter passed as input of the task */
+    2,                /* Priority of the task. */
+    NULL,             /* Task handle. */
+    1);               // Specific Core
+  //Serial.print("Pre taskREST SetupxSemaphoreUseI2C=");
+  //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ))
+  
+   xTaskCreatePinnedToCore(
+    taskSendSensors,          /* Task function. */
+    "taskSendSensors",        /* String with name of task. */
+    7000,            /* Stack size in words. */
     NULL,             /* Parameter passed as input of the task */
     2,                /* Priority of the task. */
     NULL,             /* Task handle. */
@@ -950,17 +961,17 @@ void setup()
   xTaskCreatePinnedToCore(
     taskRESTCommand,          /* Task function. */
     "TaskRESTCommand",        /* String with name of task. */
-    10000,            /* Stack size in words. */
+    7000,            /* Stack size in words. */
     NULL,             /* Parameter passed as input of the task */
     3,                /* Priority of the task. */
     NULL,             /* Task handle. */
     1);               // Specific Core
   //Serial.print("Pre taskSetValues SetupxSemaphoreUseI2C=");
- // Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+  // Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
   xTaskCreatePinnedToCore(
     taskSetValves,          /* Task function. */
     "taskSetValves",        /* String with name of task. */
-    10000,            /* Stack size in words. */
+    7000,            /* Stack size in words. */
     NULL,             /* Parameter passed as input of the task */
     3,                /* Priority of the task. */
     NULL,             /* Task handle. */
@@ -970,7 +981,7 @@ void setup()
   xTaskCreatePinnedToCore(
     taskPixelCommand,          /* Task function. */
     "TaskPixelCommand",        /* String with name of task. */
-    10000,            /* Stack size in words. */
+    7000,            /* Stack size in words. */
     NULL,             /* Parameter passed as input of the task */
     3,                /* Priority of the task. */
     NULL,             /* Task handle. */
@@ -979,7 +990,7 @@ void setup()
   xTaskCreatePinnedToCore(
     taskMainWeatherOLEDLoopDisplay,          /* Task function. */
     "TaskMainWeatherOLEDLoopDisplay",        /* String with name of task. */
-    10000,            /* Stack size in words. */
+    7000,            /* Stack size in words. */
     NULL,             /* Parameter passed as input of the task */
     2,                /* Priority of the task. */
     NULL,             /* Task handle. */
@@ -988,6 +999,11 @@ void setup()
 
   //Serial.print("EndSetupxSemaphoreUseI2C=");
   //Serial.println(uxSemaphoreGetCount( xSemaphoreUseI2C ));
+
+  xSemaphoreTake( xSemaphoreSensorsBeingRead, 10000);
+  readSensors();
+  xSemaphoreGive( xSemaphoreSensorsBeingRead);
+
   // Start OLED Loop
 
   vTaskDelay(2000 / portTICK_PERIOD_MS);

@@ -20,6 +20,26 @@
   }
 */
 
+
+void taskSendSensors( void * parameter)
+{
+  // Enter RTOS Task Loop
+  for (;;)  {
+
+    if (uxSemaphoreGetCount( xSemaphoreReadSensor ) > 0)
+    {
+      xSemaphoreTake( xSemaphoreSensorsBeingRead, 10000);
+      sendMQTT(MQTTSENSORS, "");
+      xSemaphoreGive( xSemaphoreSensorsBeingRead);
+
+    }
+    //vTaskDelay(600000 / portTICK_PERIOD_MS);
+    vTaskDelay(sensorCycle*1000 / portTICK_PERIOD_MS);
+  }
+
+}
+
+
 void taskReadSensors( void * parameter)
 {
   // Enter RTOS Task Loop
@@ -30,10 +50,10 @@ void taskReadSensors( void * parameter)
       xSemaphoreTake( xSemaphoreSensorsBeingRead, 10000);
       readSensors();
       xSemaphoreGive( xSemaphoreSensorsBeingRead);
-      sendMQTT(MQTTSENSORS, "");
+
     }
     //vTaskDelay(600000 / portTICK_PERIOD_MS);
-    vTaskDelay(sensorCycle*1000 / portTICK_PERIOD_MS);
+    vTaskDelay(30*1000 / portTICK_PERIOD_MS);
   }
 
 }

@@ -9,14 +9,14 @@ Adafruit_ADS1015 ads1015;
 
 // C1 - Grove Capacitive Moisture Sensor - SwitchDoc Labs
 
-#define CAP0PERCENT 365
-#define CAP100PERCENT 150
+#define CAP0PERCENT 945
+#define CAP100PERCENT 462
 
 float scaleMoisture(int rawValue)
 {
   float moisture_humidity = 0.0;
 
-  rawValue = rawValue / 4; // Scale to 10 bits
+  //rawValue = rawValue / 4; // Scale to 10 bits
 
   if (rawValue < CAP100PERCENT)
   {
@@ -74,6 +74,9 @@ void readSensors()
     {
       rawValue = ads1015.readADC_SingleEnded(i);
       moistureSensors[i] = scaleMoisture(rawValue);
+     
+
+
 #ifdef SGS2EXTDEBUG
       Serial.print("Channel:"); Serial.print(i); Serial.print(" Raw: "); Serial.println(rawValue);
 #endif

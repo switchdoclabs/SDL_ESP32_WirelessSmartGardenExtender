@@ -275,11 +275,11 @@ void updateDisplay(int displayMode)
       case DISPLAY_MOISTURE_4:
 
         int unit;
-        unit = displayMode - DISPLAY_MOISTURE_1 + 1;
+        unit = displayMode - DISPLAY_MOISTURE_1;
 
         // Displays Moisture Levels
         buffer[0] = '\0';
-        sprintf(buffer, "MSensor #%i", unit);
+        sprintf(buffer, "MSensor #%i", unit+1);
         setDisplayLine(0, buffer);
         buffer[0] = '\0';
         sprintf(buffer, "%3.1f%%", moistureSensors[unit]);

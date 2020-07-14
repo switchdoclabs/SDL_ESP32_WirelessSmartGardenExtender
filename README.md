@@ -7,6 +7,7 @@ ESP32 Wireless Extender
 
 March 2020
 
+July 14, 2020 - Version 024 - Production Version 
 July 10, 2020 - Version 022 - Initial Release 
 July 9, 2020 - Version 021 - Candidate 1 
 
