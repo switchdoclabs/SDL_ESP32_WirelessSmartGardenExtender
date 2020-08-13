@@ -116,7 +116,7 @@ void readPreferences()
   SolarMAXLA = preferences.getInt("SolarMAXLA", 0);
   SolarMAXLiPo = preferences.getInt("SolarMAXLiPo", 0);
   MQTT_IP = preferences.getString("MQTT_IP", "");
-  MQTT_PORT = preferences.getInt("MQTT_PORT", 1833);
+  MQTT_PORT = preferences.getInt("MQTT_PORT", 1883);
   sensorCycle = preferences.getInt("SENSORCYCLE", 600);
 
 
